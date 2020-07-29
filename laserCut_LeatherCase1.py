@@ -1,15 +1,11 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
+#!/usr/bin/env python3
 """
 A Inkscape extension to generate the pieces for a leather case that can be laser cut. 
 
 The leather case is intended to be used with up to 5 mobile phones.
 """
 
-import sys, copy
-import inkex, simpletransform
-import simplestyle
+import inkex
 import math
 from lxml import etree
 
@@ -18,21 +14,19 @@ class LeatherCase1(inkex.Effect):
     
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.arg_parser.add_argument('-w', '--width', action='store', type=float, dest='width', default=80, help='Width (mm)')
-        self.arg_parser.add_argument('-x', '--height', action='store', type=float, dest='height', default=165, help='Height (mm)')
-        self.arg_parser.add_argument('-d', '--depth', action='store', type=float, dest='depth', default=10, help='Depth (mm)')
-        self.arg_parser.add_argument('-H', '--heightMargin', action='store', type=float, dest='heightMargin', default=10, help='Height Margin (mm)')
-        self.arg_parser.add_argument('-r', '--cornerRoundness', action='store', type=float, dest='cornerRoundness', default=10, help='Corner Roundness (mm)')
-        self.arg_parser.add_argument('-i', '--divisions', action='store', type=int, dest='divisions', default=2, help='Divisions')
-        self.arg_parser.add_argument('-a', '--claspAmount', action='store', type=str, dest='claspAmount', default=1, help='Number of Clasps')
-        self.arg_parser.add_argument('-p', '--extraTongueLength', action='store', type=float, dest='extraTongueLength', default=10, help='Extra Tongue Length (mm)')
-        self.arg_parser.add_argument('-t', '--tipTongueLength', action='store', type=float, dest='tipTongueLength', default=40, help='Tip Tongue Length (mm)')
-        self.arg_parser.add_argument('-e', '--extraEdgeWidth', action='store', type=float, dest='extraEdgeWidth', default=10, help='Extra Edge Width (mm)')
-        self.arg_parser.add_argument('-o', '--makeHoles', action='store', type=str, dest='makeHoles', default="true", help='Make Holes')
-        self.arg_parser.add_argument('-g', '--groupObjects', action='store', type=str, dest='groupObjects', default="false", help='Group Objects')
+        self.arg_parser.add_argument('-w', '--width', type=float, default=80, help='Width (mm)')
+        self.arg_parser.add_argument('-x', '--height', type=float, default=165, help='Height (mm)')
+        self.arg_parser.add_argument('-d', '--depth', type=float, default=10, help='Depth (mm)')
+        self.arg_parser.add_argument('-H', '--heightMargin', type=float, default=10, help='Height Margin (mm)')
+        self.arg_parser.add_argument('-r', '--cornerRoundness', type=float, default=10, help='Corner Roundness (mm)')
+        self.arg_parser.add_argument('-i', '--divisions', type=int, default=2, help='Divisions')
+        self.arg_parser.add_argument('-a', '--claspAmount', default=1, help='Number of Clasps')
+        self.arg_parser.add_argument('-p', '--extraTongueLength', type=float, default=10, help='Extra Tongue Length (mm)')
+        self.arg_parser.add_argument('-t', '--tipTongueLength', type=float,default=40, help='Tip Tongue Length (mm)')
+        self.arg_parser.add_argument('-e', '--extraEdgeWidth', type=float, default=10, help='Extra Edge Width (mm)')
+        self.arg_parser.add_argument('-o', '--makeHoles', default="true", help='Make Holes')
+        self.arg_parser.add_argument('-g', '--groupObjects', default="false", help='Group Objects')
 
-        
-    
     def effect(self):
         width = self.options.width 
         height = self.options.height 
@@ -52,7 +46,7 @@ class LeatherCase1(inkex.Effect):
         if group: 
             parent = etree.SubElement(parent, 'g')
             
-        line_style = { 'stroke-width': 3.5433071 / 15, 'stroke':'#FF0000', 'fill':'none'}
+        line_style = { 'stroke-width': self.svg.unittouu(str(0.1) + "mm"), 'stroke':'#FF0000', 'fill':'none'}
 
         verticalLine1Size = width - cornerRoundness - 1
         
@@ -66,8 +60,7 @@ class LeatherCase1(inkex.Effect):
                         ' m 110,0' + ' c 1,0 2,1 2,2 0,1 -1,2 -2,2 -1,0 -2,-1 -2,-2 0,-1 1,-2 2,-2' 
                     )
             
-        firstPiece_attribs = {'style' : str(inkex.Style(line_style)),
-                              'transform' : 'matrix(3.5433071,0,0,3.5433071,0,0)', 
+        firstPiece_attribs = {'style' : str(inkex.Style(line_style)), 
                         'd' : 'M 0,0 l 0,' + str(verticalLine1Size) +
                         ' c 0,' + str(cornerRoundness / 2.0) + ' ' + str(cornerRoundness / 2) + ',' + str(cornerRoundness) + ' ' + str(cornerRoundness) + ',' + str(cornerRoundness) +
                         ' l ' + str(height + heightMargin * 2 - cornerRoundness * 2) + ',0' +
@@ -83,7 +76,6 @@ class LeatherCase1(inkex.Effect):
         # Intermediate pieces
         for x in range(1, divisions):
             intermediatePiece_attribs = {'style' : str(inkex.Style(line_style)),
-                              'transform' : 'matrix(3.5433071,0,0,3.5433071,0,0)', 
                         'd' : 'M ' + str(10 + x*5) + ',' + str(10 + x*5) + ' l 0,' + str(verticalLine1Size) +
                         ' c 0,' + str(cornerRoundness / 2.0) + ' ' + str(cornerRoundness / 2) + ',' + str(cornerRoundness) + ' ' + str(cornerRoundness) + ',' + str(cornerRoundness) +
                         ' l ' + str(height + heightMargin * 2 - cornerRoundness * 2) + ',0' +
@@ -95,7 +87,7 @@ class LeatherCase1(inkex.Effect):
             intermediatePiece = etree.SubElement(parent, inkex.addNS('path','svg'), intermediatePiece_attribs )
         
         
-        line_style2 = { 'stroke-width': 3.5433071 / 15, 'stroke':'#00FF00', 'fill':'none'}
+        line_style2 = { 'stroke-width': self.svg.unittouu(str(0.1) + "mm"), 'stroke':'#00FF00', 'fill':'none'}
         plainTongueLength = depth * divisions + extraTongueLength - 1 + (divisions - 1)
         totalWidth = height + heightMargin * 2;
         hole = ''
@@ -123,7 +115,6 @@ class LeatherCase1(inkex.Effect):
                       )
             
         secondPiece_attribs = {'style' : str(inkex.Style(line_style2)),
-                              'transform' : 'matrix(3.5433071,0,0,3.5433071,0,0)', 
                         'd' : 'M -5,-4 l 0,' + str(verticalLine1Size - 1) +
                         ' c 0,' + str(cornerRoundness / 2.0) + ' ' + str(cornerRoundness / 2) + ',' + str(cornerRoundness) + ' ' + str(cornerRoundness) + ',' + str(cornerRoundness) +
                         ' l ' + str(height + heightMargin * 2 - cornerRoundness * 2) + ',0' +
@@ -141,12 +132,11 @@ class LeatherCase1(inkex.Effect):
         
         secondPiece = etree.SubElement(parent, inkex.addNS('path','svg'), secondPiece_attribs )
         
-        line_style3 = { 'stroke-width': 3.5433071 / 15, 'stroke':'#0000FF', 'fill':'none'}
+        line_style3 = { 'stroke-width': self.svg.unittouu(str(0.1) + "mm"), 'stroke':'#0000FF', 'fill':'none'}
         edgeLength = (width - cornerRoundness) * 2 + height + heightMargin * 2 - cornerRoundness * 2 + 3.14159 * cornerRoundness
         edgeWidth = depth * divisions + divisions - 1 + extraEdgeWidth
         
         thirdPiece_attribs = {'style' : str(inkex.Style(line_style3)),
-                              'transform' : 'matrix(3.5433071,0,0,3.5433071,0,0)', 
                         'd' : 'M 5,5 l 0,' + str(edgeWidth) +
                         ' ' + str(edgeLength) + ',0' +
                         ' 0,' + str(-edgeWidth) + ' Z'
@@ -154,12 +144,11 @@ class LeatherCase1(inkex.Effect):
         
         thirdPiece = etree.SubElement(parent, inkex.addNS('path','svg'), thirdPiece_attribs )
         
-        line_style4 = { 'stroke-width': 3.5433071 / 15, 'stroke':'#FF00FF', 'fill':'none'}
+        line_style4 = { 'stroke-width': self.svg.unittouu(str(0.1) + "mm"), 'stroke':'#FF00FF', 'fill':'none'}
         edgeLength = 70
         edgeWidth = 60
         
         fourthPiece_attribs = {'style' : str(inkex.Style(line_style4)),
-                              'transform' : 'matrix(3.5433071,0,0,3.5433071,0,0)', 
                         'd' : 'M 10,10 l 0,' + str(edgeWidth) +
                         ' ' + str(edgeLength) + ',0' +
                         ' 0,' + str(-edgeWidth) + ' Z'
@@ -167,5 +156,4 @@ class LeatherCase1(inkex.Effect):
         
         fourthPiece = etree.SubElement(parent, inkex.addNS('path','svg'), fourthPiece_attribs )
               
-effect = LeatherCase1()
-effect.run()
+LeatherCase1().run()
