@@ -1,13 +1,10 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 
 """
 A Inkscape extension to generate a pattern that allows to bend wood or MDF one it is laser cut.
 """
 
-import sys, copy
-import inkex, simpletransform
-import simplestyle
+import inkex
 import math
 from lxml import etree
 
@@ -16,13 +13,13 @@ class BendWoodCutsPattern(inkex.Effect):
     
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.arg_parser.add_argument('-w', '--width', action='store', type=float, dest='width', default=10, help='Width (mm)')
-        self.arg_parser.add_argument('-x', '--height', action='store', type=float, dest='height', default=100, help='Height (mm)')
-        self.arg_parser.add_argument('-H', '--horizontalLineSeparation', action='store', type=float, dest='horizontalLineSeparation', default=1, help='Horizontal Line Separation (mm)')
-        self.arg_parser.add_argument('-v', '--verticalLineSeparation', action='store', type=float, dest='verticalLineSeparation', default=3, help='Vertical Line Separation (mm)')
-        self.arg_parser.add_argument('-j', '--maxLineLength', action='store', type=float, dest='maxLineLength', default=30, help='Max Line Length (mm)')
-        self.arg_parser.add_argument('-t', '--addInitMarks', action='store', type=str, dest='addInitMarks', default="false", help='Add Init Marks')
-        self.arg_parser.add_argument('-g', '--groupLines', action='store', type=str, dest='groupLines', default="false", help='Group Lines')
+        self.arg_parser.add_argument('--width', type=float, default=10, help='Width (mm)')
+        self.arg_parser.add_argument('--height', type=float, default=100, help='Height (mm)')
+        self.arg_parser.add_argument('--horizontalLineSeparation', type=float, default=1, help='Horizontal Line Separation (mm)')
+        self.arg_parser.add_argument('--verticalLineSeparation', type=float, default=3, help='Vertical Line Separation (mm)')
+        self.arg_parser.add_argument('--maxLineLength', type=float, default=30, help='Max Line Length (mm)')
+        self.arg_parser.add_argument('--addInitMarks', default="false", help='Add Init Marks')
+        self.arg_parser.add_argument('--groupLines', default="false", help='Group Lines')
 
 #draw an SVG line segment between the given (raw) points
     def draw_SVG_line(self, x1, y1, x2, y2, parent):
@@ -31,14 +28,13 @@ class BendWoodCutsPattern(inkex.Effect):
             svg = self.document.getroot()
             self.height = self.svg.unittouu(svg.attrib['height'])
            
-        line_style   = { 'stroke-width':0.35433071, 'stroke':'#000000'}
+        line_style   = { 'stroke-width':self.svg.unittouu(str(0.1)+"mm"), 'stroke':'#000000'}
 
         line_attribs = {'style' : str(inkex.Style(line_style)),
-                        'd' : 'M '+str(x1 * 3.5433071)+','+str(self.height - y1 * 3.5433071)+' L '+str(x2 * 3.5433071)+','+str(self.height - y2 * 3.5433071)}
+                        'd' : 'M '+str(x1)+','+str(self.height - y1)+' L '+str(x2)+','+str(self.height - y2)}
 
         line = etree.SubElement(parent, inkex.addNS('path','svg'), line_attribs )
-        
-    
+           
     def effect(self):
         width = self.options.width 
         height = self.options.height
@@ -58,8 +54,6 @@ class BendWoodCutsPattern(inkex.Effect):
         
         linesPerColumn = int(math.ceil(height / maxLineLength))
         ll = height / linesPerColumn
-        
-
         
         for x in range(0, xLines):
             if marks:
@@ -84,6 +78,4 @@ class BendWoodCutsPattern(inkex.Effect):
                     
                     self.draw_SVG_line(x * horizontalLineSeparation, y0, x * horizontalLineSeparation, y1, parent)
                 
-
-effect = BendWoodCutsPattern()
-effect.run()
+BendWoodCutsPattern().run()
